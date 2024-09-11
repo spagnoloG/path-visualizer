@@ -1,11 +1,15 @@
 CXX = g++
-CXXFLAGS = -std=c++17 `pkg-config --cflags opencv4` -lstdc++fs
-LDFLAGS = `pkg-config --libs opencv4` -lvtkCommonCore -lvtkFiltersSources -lvtkRenderingCore -lhdf5
+CXXFLAGS = -std=c++17 `pkg-config --cflags --libs opencv4`
+LDFLAGS = -lvtkCommonCore -lvtkFiltersSources -lvtkRenderingCore -lhdf5 -lstdc++fs
+SOURCES = src/main.cpp src/dataloader.cpp
+INCLUDES = -Iinclude
+TARGET = build/path_visualizer
 
-all: dataset_loader
+all: $(TARGET)
 
-dataset_loader: main.cpp
-	$(CXX) $(CXXFLAGS) -o dataset_loader main.cpp $(LDFLAGS)
+$(TARGET): $(SOURCES)
+	@mkdir -p build
+	$(CXX) $(CXXFLAGS) $(INCLUDES) -o $(TARGET) $(SOURCES) $(LDFLAGS)
 
 clean:
-	rm -f dataset_loader
+	rm -f $(TARGET)
