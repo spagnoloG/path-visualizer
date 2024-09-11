@@ -74,13 +74,25 @@ private:
     }
 
     void load_metadata() {
-        std::string metadata_file = data_path_ + "/metadata.json";
+        std::string metadata_file;
+        
+        for (const auto& entry : fs::directory_iterator(data_path_)) {
+            if (entry.is_regular_file() && entry.path().extension() == ".json") {
+                metadata_file = entry.path().string();
+                break;
+            }
+        }
+    
+        if (metadata_file.empty()) {
+            throw std::runtime_error("Could not find any JSON file in the directory: " + data_path_);
+        }
+    
         std::ifstream file(metadata_file);
-
+    
         if (!file.is_open()) {
             throw std::runtime_error("Could not open metadata file at: " + metadata_file);
         }
-
+    
         json metadata_json;
         try {
             file >> metadata_json;
@@ -88,12 +100,13 @@ private:
         } catch (const json::exception& e) {
             throw std::runtime_error("Error parsing metadata file: " + std::string(e.what()));
         }
-
+    
         if (metadata_.empty()) {
             throw std::runtime_error("Metadata file contains no frames.");
         }
+    
+        std::cout << "Successfully loaded metadata from: " << metadata_file << std::endl;
     }
-
     void display_metadata(size_t idx) const {
         if (idx >= metadata_.size()) {
             throw std::out_of_range("Index out of bounds for metadata access.");
